@@ -16,7 +16,7 @@ params - required
 json - true by default , if false request with form-urlencoded params
 useHttps - true by default
 
-const request = requiere('slim_request');
+let request = requiere('slim_request');
 const host = 'github.com';
 const path = '/ekonomizer/slim_request/';
 const params = {someparams};
@@ -34,7 +34,7 @@ host - required
 path - required
 params - not required, url params in object.
 
-const request = requiere('slim_request');
+let request = requiere('slim_request');
 const host = 'github.com';
 const path = '/ekonomizer/slim_request/';
 const params = {someparams};
@@ -51,7 +51,7 @@ Params:
 enableDebug - true by default
 logger - console.log by default
 
-const request = requiere('slim_request');
+let request = requiere('slim_request');
 const enableDebug = true;
 const logger = CustomUserLoggerWithMethodsDebugAndWarn();
 request.debugMode(enableDebug, logger)
