@@ -51,7 +51,7 @@ try {
 ```
 let request = require('slim_request');
 
-request.cacheMode(true);
+request.cachedMode(true);
 
 const params = {};
 params.host = 'github.com';
@@ -80,7 +80,7 @@ Or you can save requests, before send.
 ```
 let request = require('slim_request');
 
-request.cacheMode(true);
+request.cachedMode(true);
 
 const params = {};
 params.host = 'github.com';
