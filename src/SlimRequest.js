@@ -5,7 +5,7 @@ const Querystring = require('querystring');
 let debug = false;
 let cache = false;
 let log = {debug: (...args)=>{console.log(...args)}, info: (...args)=>{console.log(...args)},warn: (...args)=>{console.log(...args)},fatal: (...args)=>{console.log(...args)}};
-let requests = {};
+let savedRequests = {};
 class SlimRequest {
 
     static send(params) {
@@ -24,9 +24,9 @@ class SlimRequest {
     }
 
     static prepareUrl(params) {
-        if (params.alias && requests[params.alias]) {
-            requests[params.alias] = params.data || requests[params.alias];
-            return requests[params.alias];
+        if (params.alias && savedRequests[params.alias]) {
+            savedRequests[params.alias] = params.data || savedRequests[params.alias];
+            return savedRequests[params.alias];
         }
 
         SlimRequest.checkRequestParams(params);
@@ -50,15 +50,15 @@ class SlimRequest {
             params.json = true;
 
         if (cache)
-            if(params.alias && !requests[params.alias])
+            if(params.alias && !savedRequests[params.alias])
                 SlimRequest.saveRequest(params);
             else
-                params = requests[params.alias];
+                params = savedRequests[params.alias];
         return params;
     }
 
     static saveRequest(params) {
-        requests[params.alias] = params;
+        savedRequests[params.alias] = params;
     }
 
     static post(params) {
