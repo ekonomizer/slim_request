@@ -3,52 +3,101 @@ const http = require('http');
 const https = require('https');
 const Querystring = require('querystring');
 let debug = false;
-let log = null;
+let cache = false;
+let log = {debug: (...args)=>{console.log(...args)}, info: (...args)=>{console.log(...args)},warn: (...args)=>{console.log(...args)},fatal: (...args)=>{console.log(...args)}};
+let requests = {};
 class SlimRequest {
 
-    static debugMode(v = true, userLog = console) {
-        debug = v;
-        log = userLog;
+    static send(params) {
+        params = SlimRequest.prepareUrl(params);
+        if (params.method == "post" || params.method == "POST" )
+            return SlimRequest.post(params);
+        else
+            return SlimRequest.get(params);
     }
 
-    static post(host, path, params, port, json = true, useHttps=true) {
-        return new Promise((resolve, reject) => {
+    static checkRequestParams(params) {
+        if(!params.method)
+            throw(new Error("Post request need method post or get."));
+        if (!params.url && !params.host)
+            throw(new Error("Post request need host or url params."));
+    }
 
+    static prepareUrl(params) {
+        if (params.alias && requests[params.alias]) {
+            requests[params.alias] = params.data || requests[params.alias];
+            return requests[params.alias];
+        }
+
+        SlimRequest.checkRequestParams(params);
+        if (params.url) {
+            let parts = params.url.split('://');
+            if (parts.length != 2)
+                throw new Error("Url must be like: http://somedomain.com");
+            params.https = parts[0] === 'https';
+
+            let hostPath = parts[1].split('/');
+            let hostPort = hostPath[0].split(':');
+            params.host = hostPort[0];
+            params.port = hostPort[1];
+            params.path = hostPath[1];
+            params.url = null;
+        }
+
+        if (params.https == null || params.https == undefined)
+            params.https = true;
+        if (params.json == null || params.json == undefined)
+            params.json = true;
+
+        if (cache)
+            if(params.alias && !requests[params.alias])
+                SlimRequest.saveRequest(params);
+            else
+                params = requests[params.alias];
+        return params;
+    }
+
+    static saveRequest(params) {
+        requests[params.alias] = params;
+    }
+
+    static post(params) {
+        return new Promise((resolve, reject) => {
             if (debug)
-                log.debug("Send Post", {host, port, path, params, json, useHttps});
+                log.debug("Send Post", params);
 
             var type;
             var postData;
-            if (json) {
+            if (params.json) {
                 type = "application/json";
-                postData = JSON.stringify(params)
+                postData = JSON.stringify(params.data)
             } else {
                 type = "application/x-www-form-urlencoded";
-                postData = Querystring.stringify(params)
+                postData = Querystring.stringify(params.data)
             }
 
             var postOptions = {
-                host: host, //'closure-compiler.appspot.com'
-                path: path,  //'/compile'
+                host: params.host, //'closure-compiler.appspot.com'
+                path: params.path,  //'/compile'
                 method: 'POST',
                 headers: {
                     'Content-Type': type,
                     'Content-Length': Buffer.byteLength(postData)
                 }
             };
-            if (port)
-                postOptions.port = port;
+            if (params.port)
+                postOptions.port = params.port;
 
             if (debug)
                 log.debug('postOptions', postOptions);
 
-            let protocol = useHttps? https : http;
+            let protocol = params.https? https : http;
             let postReq = protocol.request(postOptions, (res)=> {
                 res.setEncoding('utf8');
                 res.once('data', (chunk)=> {
                     if (debug)
                         log.debug("Remote host response", {chunk: chunk});
-                    resolve(chunk);
+                    resolve({statusCode: res.statusCode, headers: res.headers, body: chunk});
                 });
                 res.once('end', ()=> {
                     if (debug)
@@ -73,27 +122,27 @@ class SlimRequest {
         })
     }
 
-    static get(host, path, params) {
+    static get(params) {
         return new Promise((resolve, reject) => {
 
-            if (params) {
+            if (params.data) {
                 var urlParams = "?";
 
-                for (let k in params) {
+                for (let k in params.data) {
                     if (urlParams != "?")
-                        urlParams += `&${k}=${params[k]}`;
+                        urlParams += `&${k}=${params.data[k]}`;
                     else
-                        urlParams += `${k}=${params[k]}`
+                        urlParams += `${k}=${params.data[k]}`
                 }
-                path += urlParams + `&sig=${sig}`;
+                params.path += urlParams;
             }
 
-            let postReq = http.request({host, path}, (res)=> {
+            let postReq = http.request(params, (res)=> {
                 res.setEncoding('utf8');
                 res.once('data', (chunk)=> {
                     if (debug)
                         log.debug("Remote host response", {chunk: chunk});
-                    resolve(chunk);
+                    resolve({statusCode: res.statusCode, headers: res.headers, body: chunk});
                 });
                 res.once('end', ()=> {
                     if (debug)
@@ -114,6 +163,15 @@ class SlimRequest {
 
             postReq.end();
         });
+    }
+
+    static debugMode(v = true, userLog ) {
+        debug = v;
+        log = log || userLog;
+    }
+
+    static cachedMode(v = true) {
+        cache = v;
     }
 }
 

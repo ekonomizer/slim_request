@@ -1,0 +1,22 @@
+{
+  "name": "slim_request",
+  "version": "1.0.0",
+  "description": "Very slim request module for node v >=7 with 0 dependencies, for async/await requests(post,get,http,https,json,form-urlencoded).",
+  "main": "./src/SlimRequest.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekonomizer/slim_request/"
+  },
+  "keywords": [
+    "node",
+    "request",
+    "async",
+    "await",
+    "slim"
+  ],
+  "author": "ekonomizer",
+  "license": "MIT"
+}

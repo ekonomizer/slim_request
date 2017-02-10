@@ -7,39 +7,71 @@ Very slim request module for node v >=7 with 0 dependencies, for async/await req
 ```
 npm install slim_request
 ```
-###Post request, return Promise.
-```
+###Send request, return Promise.
 Params: 
-host - required
-path - required
-params - required
-json - true by default , if false request with form-urlencoded params
-useHttps - true by default
+```
+url - full address(http://github.com:80), string
+host - host name (github.com), string
+path - (/ekonomizer/slim_request), string
+port - not required, int
+data - request params, object
+json - request params format, boolean, true by default, if false request with form-urlencoded params
+https - protocol, boolean, true by default
 
-let request = requiere('slim_request');
-const host = 'github.com';
-const path = '/ekonomizer/slim_request/';
-const params = {someparams};
+const request = require('slim_request');
+const url = "https://github.com:80/ekonomizer/slim_request"
 try {
-  let body = await request.post(host, path, params); 
+  let body = await request.send({method: 'get', url});
+  console.log(res.body, res.statusCode, res.headers);
 } catch(e) {
   throw(e);
 }
 ```
 
-###Get request, return Promise.
+###Custom params. You can set custom params:
 ```
-Params:
-host - required
-path - required
-params - not required, url params in object.
+const request = require('slim_request');
+const params = {};
+params.host = 'github.com';
+params.path = '/ekonomizer/slim_request';
+params.port = 80;
+params.method = 'post';
+pararms.json = false;
+params.data = {somedata};
 
-let request = requiere('slim_request');
-const host = 'github.com';
-const path = '/ekonomizer/slim_request/';
-const params = {someparams};
 try {
-  let body = await request.post(host, path, params);
+  let res = await request.post(params);
+  console.log(res.body, res.statusCode, res.headers);
+} catch(e) {
+  throw(e);
+}
+```
+
+###Cache mode. You can enable cache mode(module save you request params, and they are available by alias)
+```
+let request = require('slim_request');
+
+request.cacheMode(true);
+
+const params = {};
+params.host = 'github.com';
+params.method = 'post';
+params.data = {somedata};
+params.alias = 'github slim request';
+
+try {
+  let res = await request.send(params);
+  console.log(res.body, res.statusCode, res.headers)
+} catch(e) {
+  throw(e);
+}
+
+params = {};
+params.data = {someOtherData}; // can send request without new params(with old)
+params.alias = 'github slim request';
+try {
+  let res = await request.send(params);
+  console.log(res.body, res.statusCode, res.headers)
 } catch(e) {
   throw(e);
 }
@@ -51,7 +83,7 @@ Params:
 enableDebug - true by default
 logger - console.log by default
 
-let request = requiere('slim_request');
+const request = require('slim_request');
 const enableDebug = true;
 const logger = CustomUserLoggerWithMethodsDebugAndWarn();
 request.debugMode(enableDebug, logger)
