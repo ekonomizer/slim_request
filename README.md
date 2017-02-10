@@ -21,7 +21,7 @@ https - protocol, boolean, true by default
 const request = require('slim_request');
 const url = "https://github.com:80/ekonomizer/slim_request"
 try {
-  let body = await request.send({method: 'get', url});
+  let res = await request.send({method: 'get', url});
   console.log(res.body, res.statusCode, res.headers);
 } catch(e) {
   throw(e);
