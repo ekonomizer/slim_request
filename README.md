@@ -76,6 +76,28 @@ try {
   throw(e);
 }
 ```
+Or you can save requests, before send.
+```
+let request = require('slim_request');
+
+request.cacheMode(true);
+
+const params = {};
+params.host = 'github.com';
+params.method = 'post';
+params.data = {somedata};
+params.alias = 'github slim request';
+
+request.saveRequest(params);
+console.log(requests.savedRequests);
+
+try {
+  let res = await request.send({alias: 'github slim request'});
+  console.log(res.body, res.statusCode, res.headers)
+} catch(e) {
+  throw(e);
+}
+```
 
 ###Debug mode. You can enable debug mode, and set logger in module.
 ```
