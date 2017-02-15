@@ -99,6 +99,38 @@ try {
 }
 ```
 
+###PreLoad requests from config.
+####You can preload config vith request params to slim_request.
+```
+Important - config must have object requests with array request params.
+let request = require('slim_request');
+const config = {
+    payments: {
+        ios: {
+            requests: [{
+                alias: "ios_real",
+                url: "https://buy.itunes.apple.com:443/verifyReceipt",
+                json: false,
+                method: "post"},
+                {alias: "ios_test",
+                url: "https://sandbox.itunes.apple.com:443/verifyReceipt",
+                method: "post"}
+            ]
+        }
+    }
+}
+
+request.cachedMode(true);
+request.loadRequests(config);
+console.log(request.savedRequests);
+
+try {
+  let res = await request.send({alias: 'ios_real', {data}});
+  console.log(res.body, res.statusCode, res.headers)
+} catch(e) {
+  throw(e);
+}
+```
 ###Debug mode. You can enable debug mode, and set logger in module.
 ```
 Params:

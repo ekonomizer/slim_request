@@ -25,7 +25,7 @@ class SlimRequest {
 
     static prepareUrl(params) {
         if (params.alias && savedRequests[params.alias]) {
-            savedRequests[params.alias] = params.data || savedRequests[params.alias];
+            savedRequests[params.alias].data = params.data || savedRequests[params.alias].data;
             return savedRequests[params.alias];
         }
 
@@ -36,11 +36,21 @@ class SlimRequest {
                 throw new Error("Url must be like: http://somedomain.com");
             params.https = parts[0] === 'https';
 
+            let hostLength = parts[1].indexOf('/');
+
             let hostPath = parts[1].split('/');
-            let hostPort = hostPath[0].split(':');
+            let host = hostPath.shift();
+            let hostPort = host.split(':');
             params.host = hostPort[0];
             params.port = hostPort[1];
-            params.path = hostPath[1];
+
+            let path = "/" + hostPath.join('/');
+            if (path.indexOf('?') != -1) {
+                let pathParams = path.split('?');
+                path = pathParams[0];
+
+            }
+            params.path = path;
             params.url = null;
         }
 
@@ -57,10 +67,6 @@ class SlimRequest {
         return params;
     }
 
-    static saveRequest(params) {
-        savedRequests[params.alias] = params;
-    }
-
     static post(params) {
         return new Promise((resolve, reject) => {
             if (debug)
@@ -70,10 +76,10 @@ class SlimRequest {
             var postData;
             if (params.json) {
                 type = "application/json";
-                postData = JSON.stringify(params.data)
+                postData = JSON.stringify(params.data || {})
             } else {
                 type = "application/x-www-form-urlencoded";
-                postData = Querystring.stringify(params.data)
+                postData = Querystring.stringify(params.data || {})
             }
 
             var postOptions = {
@@ -124,7 +130,6 @@ class SlimRequest {
 
     static get(params) {
         return new Promise((resolve, reject) => {
-
             if (params.data) {
                 var urlParams = "?";
 
@@ -165,6 +170,32 @@ class SlimRequest {
         });
     }
 
+
+    static saveRequest(params) {
+        savedRequests[params.alias] = params;
+    }
+
+    static checkRequestsAndSave(requests) {
+        if (!requests || typeof requests !== "object")
+            return;
+        if (Object.keys(requests).indexOf("requests") == -1) {
+            for (let name in requests) {
+                SlimRequest.checkRequestsAndSave(requests[name]);
+            }
+            return;
+        }
+
+        for (let request of requests.requests) {
+            SlimRequest.prepareUrl(request);
+        }
+    }
+
+    static loadRequests(cfg) {
+        for (let name of cfg.requests) {
+            SlimRequest.checkRequestsAndSave(cfg[name])
+        }
+    }
+
     static debugMode(v = true, userLog ) {
         debug = v;
         log = log || userLog;
@@ -172,6 +203,10 @@ class SlimRequest {
 
     static cachedMode(v = true) {
         cache = v;
+    }
+
+    static get savedRequests() {
+        return savedRequests
     }
 }
 
