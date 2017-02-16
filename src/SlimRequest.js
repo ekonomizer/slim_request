@@ -29,6 +29,8 @@ class SlimRequest {
             return savedRequests[params.alias];
         }
 
+
+
         SlimRequest.checkRequestParams(params);
         if (params.url) {
             let parts = params.url.split('://');
@@ -59,11 +61,8 @@ class SlimRequest {
         if (params.json == null || params.json == undefined)
             params.json = true;
 
-        if (cache)
-            if(params.alias && !savedRequests[params.alias])
-                SlimRequest.saveRequest(params);
-            else
-                params = savedRequests[params.alias];
+        if (cache && params.alias)
+            SlimRequest.saveRequest(params);
         return params;
     }
 
@@ -201,7 +200,7 @@ class SlimRequest {
         log = log || userLog;
     }
 
-    static cachedMode(v = true) {
+    static cacheMode(v = true) {
         cache = v;
     }
 
