@@ -1,5 +1,5 @@
 {
-  "name": "slim_request",
+  "name": "slim-request",
   "version": "1.0.3",
   "description": "Very slim request module for node v >=7 with 0 dependencies, for async/await requests(post,get,http,https,json,form-urlencoded).",
   "main": "./src/SlimRequest.js",
@@ -18,5 +18,12 @@
     "slim"
   ],
   "author": "ekonomizer",
+  "homepage": "https://github.com/ekonomizer/slim_request#readme",
+  "bugs": {
+    "url": "https://github.com/ekonomizer/slim_request/issues"
+  },
+  "engines": {
+    "node": ">=7.0.0"
+  },
   "license": "MIT"
 }
