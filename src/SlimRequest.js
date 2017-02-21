@@ -98,15 +98,17 @@ class SlimRequest {
 
             let protocol = params.https? https : http;
             let postReq = protocol.request(postOptions, (res)=> {
+                let data = '';
                 res.setEncoding('utf8');
                 res.once('data', (chunk)=> {
                     if (debug)
                         log.debug("Remote host response", {chunk: chunk});
-                    resolve({statusCode: res.statusCode, headers: res.headers, body: chunk});
+                    data += chunk;
                 });
                 res.once('end', ()=> {
                     if (debug)
                         log.debug('No more data in response.');
+                    resolve({statusCode: res.statusCode, headers: res.headers, body: data});
                     res.removeAllListeners();
                 })
             });
