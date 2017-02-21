@@ -100,7 +100,7 @@ class SlimRequest {
             let postReq = protocol.request(postOptions, (res)=> {
                 let data = '';
                 res.setEncoding('utf8');
-                res.once('data', (chunk)=> {
+                res.on('data', (chunk)=> {
                     if (debug)
                         log.debug("Remote host response", {chunk: chunk});
                     data += chunk;
