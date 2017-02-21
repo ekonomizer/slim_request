@@ -1,6 +1,6 @@
 {
   "name": "slim-request",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Very slim request module for node v >=7 with 0 dependencies, for async/await requests(post,get,http,https,json,form-urlencoded).",
   "main": "./src/SlimRequest.js",
   "scripts": {
